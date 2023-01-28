@@ -1,12 +1,14 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import multer from 'multer';
+import cors from 'cors';
 
 import { loginValidation, registerValidation } from './validations/auth.js';
 import { postCreateValidation, postUpdateValidation } from './validations/post.js';
 
 import { checkAuth, handleValidationErrors } from './utils/index.js';
 import { UserController, PostController } from './controllers/index.js';
+import { getLastTags } from './controllers/PostController.js';
 
 const app = express();
 
@@ -31,7 +33,9 @@ mongoose
 	.catch((err) => console.error('DB Error', err));
 
 app.use(express.json());
+app.use(cors());
 app.use('/uploads', express.static('uploads'));
+//
 
 app.get('/auth/me', checkAuth, UserController.getMe);
 app.post('/auth/login', loginValidation, handleValidationErrors, UserController.login);
@@ -52,6 +56,8 @@ app.patch(
 	PostController.update,
 );
 app.delete('/posts/:id', checkAuth, PostController.remove);
+//
+app.get('/tags', getLastTags);
 
 //run
 app.listen(1337, (err) => {
