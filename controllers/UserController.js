@@ -17,7 +17,7 @@ export const register = async (req, res) => {
 
 		const user = await doc.save();
 
-		const token = jwt.sign({ _id: user._id }, 'secret123', { expiresIn: '2h' });
+		const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
 
 		const { passwordHash, ...userData } = user._doc;
 
@@ -42,7 +42,7 @@ export const login = async (req, res) => {
 			return res.status(400).json({ message: 'Incorrect email or password' });
 		}
 
-		const token = jwt.sign({ _id: user._id }, 'secret123', { expiresIn: '2h' });
+		const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
 
 		const { passwordHash, ...userData } = user._doc;
 

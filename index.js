@@ -1,5 +1,8 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
+import fs from 'fs';
 import multer from 'multer';
 import cors from 'cors';
 
@@ -14,6 +17,9 @@ const app = express();
 
 const storage = multer.diskStorage({
 	destination: (_, __, cb) => {
+		if (!fs.existsSync('uploads')) {
+			fs.mkdirSync('uploads');
+		}
 		cb(null, 'uploads');
 	},
 	filename: (_, file, cb) => {
@@ -26,9 +32,7 @@ const upload = multer({ storage });
 //
 mongoose.set('strictQuery', true);
 mongoose
-	.connect(
-		'mongodb+srv://admin:admin@cluster0.heqxfjv.mongodb.net/blog?retryWrites=true&w=majority',
-	)
+	.connect(process.env.MONGODB_URI)
 	.then(() => console.log('DB OK'))
 	.catch((err) => console.error('DB Error', err));
 
@@ -60,7 +64,7 @@ app.delete('/posts/:id', checkAuth, PostController.remove);
 app.get('/tags', getLastTags);
 
 //run
-app.listen(1337, (err) => {
+app.listen(process.env.NODE_PORT || 1337, (err) => {
 	if (err) {
 		return console.log(err);
 	}
