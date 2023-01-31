@@ -8,10 +8,10 @@ import cors from 'cors';
 
 import { loginValidation, registerValidation } from './validations/auth.js';
 import { postCreateValidation, postUpdateValidation } from './validations/post.js';
+import { commentCreateValidation } from './validations/comment.js';
 
 import { checkAuth, handleValidationErrors } from './utils/index.js';
-import { UserController, PostController } from './controllers/index.js';
-import { getLastTags } from './controllers/PostController.js';
+import { UserController, PostController, CommentController } from './controllers/index.js';
 
 const app = express();
 
@@ -61,7 +61,11 @@ app.patch(
 );
 app.delete('/posts/:id', checkAuth, PostController.remove);
 //
-app.get('/tags', getLastTags);
+app.get('/tags', PostController.getLastTags);
+//
+app.get('/comments/:id', CommentController.getAll);
+app.get('/comments', CommentController.getAllLastComments);
+app.post('/comments/:id', checkAuth, commentCreateValidation, CommentController.create);
 
 //run
 app.listen(process.env.NODE_PORT || 1337, (err) => {
