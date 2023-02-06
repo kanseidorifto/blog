@@ -1,26 +1,56 @@
 import PostModel from '../models/Post.js';
-
-export const getLastTags = async (req, res) => {
-	try {
-		const posts = await PostModel.find().limit(5).exec();
-
-		const tags = posts
-			.map((post) => post.tags)
-			.flat()
-			.slice(0, 5);
-
-		res.json(tags);
-	} catch (err) {
-		console.log(err);
-		res.status(500).json({ message: 'Failed to retrive tags' });
-	}
-};
+import CommentModel from '../models/Comment.js';
 
 export const getAll = async (req, res) => {
 	try {
-		const posts = await PostModel.find().populate('user').sort({ createdAt: 'desc' }).exec();
+		const sortBy = req.query.sortBy;
 
-		res.json(posts);
+		let sort;
+		switch (sortBy) {
+			case 'views':
+				sort = { viewsCount: -1 };
+				break;
+			default: //latest
+				sort = { createdAt: -1 };
+		}
+
+		const result = await PostModel.aggregate([
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'user',
+					foreignField: '_id',
+					as: 'user',
+				},
+			},
+			{ $unwind: '$user' },
+			{
+				$lookup: {
+					from: 'comments',
+					localField: '_id',
+					foreignField: 'post',
+					as: 'comment',
+				},
+			},
+			{
+				$project: {
+					_id: 1,
+					title: 1,
+					text: 1,
+					tags: 1,
+					viewsCount: 1,
+					commentsCount: { $size: '$comment' },
+					'user._id': 1,
+					'user.fullName': 1,
+					'user.avatarUrl': 1,
+					imageUrl: 1,
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			},
+			{ $sort: sort },
+		]);
+		res.json(result);
 	} catch (err) {
 		console.log(err);
 		res.status(500).json({ message: 'Failed to retrive articles' });

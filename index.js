@@ -11,7 +11,12 @@ import { postCreateValidation, postUpdateValidation } from './validations/post.j
 import { commentCreateValidation } from './validations/comment.js';
 
 import { checkAuth, handleValidationErrors } from './utils/index.js';
-import { UserController, PostController, CommentController } from './controllers/index.js';
+import {
+	UserController,
+	PostController,
+	TagsController,
+	CommentController,
+} from './controllers/index.js';
 
 const app = express();
 
@@ -61,7 +66,8 @@ app.patch(
 );
 app.delete('/posts/:id', checkAuth, PostController.remove);
 //
-app.get('/tags', PostController.getLastTags);
+app.get('/tags', TagsController.getLastTags);
+app.get('/tags/:tag', TagsController.getAllBy);
 //
 app.get('/comments/:id', CommentController.getAll);
 app.get('/comments', CommentController.getAllLastComments);

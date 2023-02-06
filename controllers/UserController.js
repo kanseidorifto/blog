@@ -64,7 +64,7 @@ export const getMe = async (req, res) => {
 		const { passwordHash, ...userData } = user._doc;
 
 		res.json(userData);
-	} catch (error) {
+	} catch (err) {
 		console.log(err);
 		res.status(401).json({ message: 'No access' });
 	}
